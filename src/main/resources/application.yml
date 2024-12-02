@@ -1,0 +1,8 @@
+gateway:
+  baseUrl: https://swapi.dev/api
+  filmEndpoint: /films/
+  characterEndpoint: /people/
+  planetEndpoint: /planets/
+
+server:
+  port: 8090
