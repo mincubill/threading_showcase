@@ -45,13 +45,15 @@ public class FilmUseCaseImplParallel implements FilmUseCase {
         try {
             FilmDto filmDto = gateway.getFilm(id);
             Queue<Character> characters = new ConcurrentLinkedQueue<>();
-                filmDto.characters.parallelStream().forEach(characterUrl -> {
-                String characterId = UrlUtils.getId(characterUrl);
-                CharacterDto characterDto = characterGateway.getCharacter(Integer.parseInt(characterId));
-                String planetId = UrlUtils.getId(characterDto.getHomeworld());
-                PlanetDto planetDto = planetGateway.getPlanet(Integer.parseInt(planetId));
-                characters.add(characterMapper.mapToCharacter(characterDto, planetDto));
-            });
+                    filmDto.characters.parallelStream().forEach(characterUrl -> {
+                    String characterId = UrlUtils.getId(characterUrl);
+                    CharacterDto characterDto = characterGateway.getCharacter(Integer.parseInt(characterId));
+                    String planetId = UrlUtils.getId(characterDto.getHomeworld());
+                    PlanetDto planetDto = planetGateway.getPlanet(Integer.parseInt(planetId));
+                    characters.add(characterMapper.mapToCharacter(characterDto, planetDto));
+                    LOG.info("getting character - {}", characterId);
+
+                });
             Film response = mapper.mapToFilm(gateway.getFilm(id));
             response.setCharacters(characters.stream().toList());
             LOG.info("listoco");

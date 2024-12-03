@@ -19,7 +19,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 
 @Component
 public class FilmUseCaseImplAsync implements FilmUseCase {
@@ -48,14 +51,21 @@ public class FilmUseCaseImplAsync implements FilmUseCase {
     public Film getFilm(int id) {
         try {
             FilmDto filmDto = gateway.getFilm(id);
-            List<Character> characters = new ArrayList<>();
-            for(String characterUrl : filmDto.characters) {
+            Queue<Character> characters = new ConcurrentLinkedQueue<>();
+            filmDto.characters.forEach( characterUrl -> {
                 String characterId = UrlUtils.getId(characterUrl);
                 CompletableFuture<Character> characterDto = getCharacterAsync(characterId);
-                characters.add(characterDto.get());
-            }
+                try {
+                    characters.add(characterDto.get());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } catch (ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+                LOG.info("getting character - {}", characterId);
+            });
             Film response = mapper.mapToFilm(gateway.getFilm(id));
-            response.setCharacters(characters);
+            response.setCharacters(characters.stream().toList());
 
             return response;
         }
