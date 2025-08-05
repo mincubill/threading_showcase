@@ -15,7 +15,7 @@ public class FilmController {
     private final FilmUseCase useCase;
     private static final Logger LOG = LoggerFactory.getLogger(FilmController.class);
 
-    public FilmController(@Qualifier("useCaseAsync") FilmUseCase useCase) {
+    public FilmController(@Qualifier("useCaseFlux") FilmUseCase useCase) {
         this.useCase = useCase;
     }
 

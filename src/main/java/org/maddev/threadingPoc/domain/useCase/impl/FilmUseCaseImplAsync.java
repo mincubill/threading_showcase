@@ -39,13 +39,12 @@ public class FilmUseCaseImplAsync implements FilmUseCase {
         try {
             FilmDto filmDto = gateway.getFilm(id);
             Queue<Character> characters = new ConcurrentLinkedQueue<>();
-            ExecutorService executorService = Executors.newFixedThreadPool(10);
+            ExecutorService executorService = Executors.newWorkStealingPool();
             List<CompletableFuture<Void>> futures = new ArrayList<>();
 
             filmDto.characters.forEach( characterUrl -> {
                 CompletableFuture<Void> future = CompletableFuture.runAsync(() ->
                 {
-
                     String characterId = UrlUtils.getId(characterUrl);
                     CompletableFuture<Character> characterDto = characterAsync.getCharacterAsync(characterId);
                     try {
